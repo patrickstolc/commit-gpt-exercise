@@ -6,12 +6,24 @@ import time
 import requests
 from typing import List, Dict
 
+# Constants
 SYSTEM_PROMPT = """
-Instruct the LLM in what to do with the data that is provided to it.
-"""
-MODEL_NAME = ""  # TODO: Replace with the actual model name from gpt4all
-API_ENDPOINT = ""  # TODO: Replace with the actual API endpoint from gpt4all
+### System:
+You are an expert software engineer with decades of experience reviewing code. 
+With your high attention to detail and given any git diff, your write accurate and concise commit messages. 
+Write a clear title of the commit and one or two sentences with explaination of the commit. Don't bable.
 
+Output the suggested commit message in json, as follows:
+
+{
+    "title": "{commit message title}",
+    "description": "{commit message description}"
+}
+"""
+MODEL_NAME = "llama3.1:8b"
+API_ENDPOINT = (
+    "http://127.0.0.1:11434"  # TODO: Replace with the actual API endpoint from gpt4all
+)
 API_KEY = "YOUR_API_KEY"  # TODO: Replace with the actual API key from gpt4all (maybe not needed)
 MAX_RETRIES = 3  # Number of retries for the LLM API call
 BASE_DELAY = 1  # Base delay in seconds between retries
@@ -70,14 +82,7 @@ def get_git_diffs(repo_path: str) -> str:
     repo = git.Repo(repo_path)
     diffs = []
     for item in repo.index.diff(None):
-        """
-        TODO: Implement the logic to get the git diffs
-
-        Think about what should be passed to the LLM.
-        Can you in any way guide the LLM to write a good commit message by preprocessing the data in any way?
-        """
         diff_text = repo.git.diff(item.a_path)
-
         # remove lines without + or -
         diff_text = "\n".join(
             [
@@ -92,13 +97,24 @@ def get_git_diffs(repo_path: str) -> str:
 
 
 def generate_commit_message(diffs: str) -> str | None:
-    # TODO: Implement the logic to generate the commit message from the LLM response
-    return None
+    response = call_llm_api(diffs)
+    return response
 
 
 def call_llm_api(prompt: str) -> str | None:
-    # TODO: Implement the logic to call the LLM API
-    return None
+    url = f"{API_ENDPOINT}/v1/completions"
+    payload = {
+        "prompt": f"{SYSTEM_PROMPT}\n\n{prompt}",
+        "model": MODEL_NAME,
+        "max_tokens": 2048,
+        "temperature": 1.0
+    }
+
+    response = requests.post(url, json=payload)
+    response_obj = response.json()
+    if "choices" not in response_obj:
+        return None
+    return response_obj["choices"][0]["text"]
 
 
 def main():
@@ -123,8 +139,10 @@ def main():
             print("No commit message generated.")
             return
 
+        commit_message_obj = json.loads(commit_message.replace("\n", "").strip())
         print("Suggested commit message: ")
-        print(commit_message)
+        print(f"Title: {commit_message_obj['title']}")
+        print(f"Description: {commit_message_obj['description']}")
     except Exception as e:
         print(f"An error occurred while generating the commit message: {str(e)}")
         print("Please try again later or write the commit message manually.")
