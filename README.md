@@ -22,9 +22,16 @@ Install the dependencies using `pip install -r requirements.txt`.
 python main.py <path-to-git-repository>
 ```
 
+## Example
+
+```bash
+python main.py .
+```
+
 Output:
 
 ```bash
 Suggested commit message:
-None
+Title: Configure Constants
+Description: Filled in MODEL_NAME and API_ENDPOINT with specific values
 ```
