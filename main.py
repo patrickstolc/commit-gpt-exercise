@@ -9,10 +9,10 @@ from typing import List, Dict
 SYSTEM_PROMPT = """
 Instruct the LLM in what to do with the data that is provided to it.
 """
-MODEL_NAME = ""  # TODO: Replace with the actual model name from gpt4all
-API_ENDPOINT = ""  # TODO: Replace with the actual API endpoint from gpt4all
+MODEL_NAME = ""  # TODO: Replace with the actual model name from ollama
+API_ENDPOINT = ""  # TODO: Replace with the actual API endpoint from ollama
 
-API_KEY = "YOUR_API_KEY"  # TODO: Replace with the actual API key from gpt4all (maybe not needed)
+API_KEY = "YOUR_API_KEY"  # TODO: Replace with the actual API key from ollama (maybe not needed)
 MAX_RETRIES = 3  # Number of retries for the LLM API call
 BASE_DELAY = 1  # Base delay in seconds between retries
 
